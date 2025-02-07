@@ -1,0 +1,9 @@
+{
+    "version": 2,
+    "builds": [
+      { "src": "send_email.php", "use": "@vercel/php" }
+    ],
+    "routes": [
+      { "src": "/(.*)", "dest": "/send_email.php" }
+    ]
+  }

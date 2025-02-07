@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Perfil de Cliente - Qualitech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div id="formulario" class="max-w-4xl mx-auto bg-white p-8 shadow-lg">
+        </div>
+
+    <div class="text-center mt-6">
+        <button onclick="descargarPDF()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Descargar y Enviar PDF
+        </button>
+    </div>
+
+<script>
+    async function descargarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            orientation: 'p',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const formulario = document.getElementById('formulario');
+
+        // Capture the PDF as a data URL
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                doc.html(formulario, {
+                    callback: function(doc) {
+                        const pdfBytes = doc.output('arraybuffer'); // Get PDF as ArrayBuffer
+                        resolve(pdfBytes); 
+                    },
+                    x: 10,
+                    y: 10,
+                    width: 190,
+                    windowWidth: formulario.scrollWidth
+                });
+            }, 500);
+        }).then(async (pdfBytes) => {
+            try {
+                const formData = new FormData();
+                formData.append('pdf', new Blob([pdfBytes], { type: 'application/pdf' }), 'Formulario_Qualitech.pdf');
+
+                // Send the PDF via fetch (you'll need a server-side script to handle this)
+                const response = await fetch('send_email.php', { // Replace with your server-side script URL
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('El formulario se ha enviado correctamente.');
+                } else {
+                    const errorData = await response.json(); // Try to parse error response
+                    alert('Error al enviar el formulario: ' + (errorData.message || response.statusText));
+                    console.error('Server Error:', errorData); // Log the full error for debugging
+                }
+
+            } catch (error) {
+                alert('Error al enviar el formulario: ' + error.message);
+                console.error('Client-side error:', error);
+            }
+        });
+
+    }
+</script>
+</body>
+</html>A
